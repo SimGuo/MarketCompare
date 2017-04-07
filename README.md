@@ -1,2 +1,1 @@
-# MarketCompare
-Android应用市场比较
+比较Google Play、国内各大Android应用市场（应用宝、百度手机助手、360手机助手、豌豆荚等等）的同一应用的apk文件以及文字信息的差异
