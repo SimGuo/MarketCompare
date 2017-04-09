@@ -44,7 +44,7 @@ market_name = {
 	26: '应用酷'
 }
 
-standard_market_id = 4
+standard_market_id = 7
 
 def edit_distance(str1, str2):
 	if str1 == None or str2 == None:
@@ -86,20 +86,22 @@ if __name__ == '__main__':
 			standard_description.append(info[0])
 			standard_release_note.append(info[1])
 	result = []
-	for i in range(package_list):
+	for i in range(len(package_list)):
 		package = package_list[i]
 		package_result = []
 		for market in market_list:
 			ifexists = cursor.execute("select Description, ReleaseNote from Market_APK_Metadata where Package_Name = '"+package+"' and MarketID = "+str(market))
 			if ifexists == 0:
 				package_result.append((None, None))
+				print("Not Found "+package+" In "+market_name[market])
 			else:
 				info = cursor.fetchall()[0]
 				package_result.append((edit_distance(standard_description[i], info[0]), edit_distance(standard_release_note[i], info[1])))
+				print("Finish "+package+" In "+market_name[market])
 		result.append(package_result)
 	cursor.close()
 	conn.close()
-	fout = open('Description_Edit_Distance_With_'+str(standard_market_id)+'.csv')
+	fout = open('Description_Edit_Distance_With_'+str(standard_market_id)+'.csv', 'w')
 	for j in range(len(market_list)):
 		fout.write(','+market_name[market_list[j]])
 	fout.write("\n")
@@ -113,7 +115,7 @@ if __name__ == '__main__':
 		fout.write("\n")
 	fout.close()
 	print("Finish Description Edit Distance - "+str(standard_market_id))
-	fout = open('Release_Note_Edit_Distance_With_'+str(standard_market_id)+'.csv')
+	fout = open('Release_Note_Edit_Distance_With_'+str(standard_market_id)+'.csv', 'w')
 	for j in range(len(market_list)):
 		fout.write(','+market_name[market_list[j]])
 	fout.write("\n")
