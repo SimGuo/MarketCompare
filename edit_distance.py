@@ -44,8 +44,6 @@ market_name = {
 	26: '应用酷'
 }
 
-standard_market_id = 7
-
 def edit_distance(str1, str2):
 	if str1 == None or str2 == None:
 		return None
