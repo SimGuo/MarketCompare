@@ -83,24 +83,37 @@ def get_version(package, market, md5, sha256):
 		version = dom.documentElement.getAttribute("android:versionName")
 		return version
 	except:
-		try:
-			fin = codecs.open(root+market+"/"+package+'/{'+md5+'-'+sha256+'}/AndroidManifest.xml', 'r', 'utf-8')
-			data = fin.read()
-			matcher = re.findall('android:versionName=".*?"', data)
-			if len(matcher):
-				return matcher[0].replace('android:versionName="', "").replace('"', "")
-			return None
-		except:
+		for charset in ('utf-8', 'gb2312'):
 			try:
-				fin = codecs.open(root+market+"/"+package+'/{'+md5+'-'+sha256+'}/AndroidManifest.xml', 'r', 'gb2312')
+				fin = codecs.open(root+market+"/"+package+'/{'+md5+'-'+sha256+'}/AndroidManifest.xml', 'r', charset)
 				data = fin.read()
 				matcher = re.findall('android:versionName=".*?"', data)
 				if len(matcher):
 					return matcher[0].replace('android:versionName="', "").replace('"', "")
-				return None
 			except:
-				print ('IO Exception '+package+' In '+market)
-				return None
+				pass
+		return None
+
+def get_permission(package, market, md5, sha256):
+	if not os.path.isfile(root+market+"/"+package+'/{'+md5+'-'+sha256+'}/AndroidManifest.xml'):
+		return None
+	for charset in ('utf-8', 'gb2312'):
+		try:
+			fin = codecs.open(root+market+"/"+package+'/{'+md5+'-'+sha256+'}/AndroidManifest.xml', 'r', charset)
+			data = fin.read()
+			result = set()
+			matcher = re.findall('<uses-permission[ \t\r\n]*android:name=".*?"', data)
+			if len(matcher):
+				for permission in matcher:
+					result.add(re.subn('<uses-permission[ \t\r\n]*android:name="', "", permission)[0].replace('"', ""))
+			matcher = re.findall('<android:uses-permission[ \t\r\n]*android:name=".*?"', data)
+			if len(matcher):
+				for permission in matcher:
+					result.add(re.subn('<android:uses-permission[ \t\r\n]*android:name="', "", permission)[0].replace('"', ""))
+			return result
+		except:
+			pass
+	return set()
 
 if __name__ == '__main__':
 	conn = pymysql.connect(host='localhost', port=3306, user='root', password='pkuoslab', db='Android', charset='utf8')
@@ -112,8 +125,7 @@ if __name__ == '__main__':
 			market = market_list[i]
 			ifexists = cursor.execute("select Market_APK_ID from Market_APP_Metadata where Package_Name = '"+package+"' and MarketID="+str(market))
 			if ifexists == 0:
-				package_result.append((None, None))
-				#print("Not Found "+package+" In "+market_name[market])
+				package_result.append((None, None, None))
 			else:
 				apk_id = cursor.fetchall()[0][0]
 				cursor.execute("select Version, MD5, SHA256 from Market_APK_Metadata where ID="+str(apk_id))
@@ -123,14 +135,26 @@ if __name__ == '__main__':
 				md5 = info[1]
 				sha256 = info[2]
 				version_manifest = get_version(package, market_dir[market_list[i]], md5, sha256)
+				permission_set = get_permission(package, market_dir[market_list[i]], md5, sha256)
 				if version_metadata != version_manifest:
 					version_metadata_str = version_metadata
 					if version_metadata == None: version_metadata_str = 'None'
 					version_manifest_str = version_manifest
 					if version_manifest == None: version_manifest_str = 'None'
 					print ("Version of "+package+" In "+market_name[market]+" Not Matched: "+version_metadata_str+" & "+version_manifest_str)
-				package_result.append((version_metadata, version_manifest))
+				package_result.append((version_metadata, version_manifest, permission_set))
 		result.append(package_result)
+		for i in range(len(market_list)):
+			for j in range(i+1, len(market_list)):
+				if package_result[i][2] != None and package_result[j][2] != None:
+					if package_result[i][2] != package_result[j][2] and package_result[i][1] == package_result[j][1]:
+						print ("Permission of "+package+" In "+market_name[market_list[i]]+" and "+market_name[market_list[j]]+" Not the Same While Same Version: ("+str(len(package_result[i][2]))+") ("+str(len(package_result[j][2]))+")")
+						for permission in package_result[i][2]:
+							if not permission in package_result[j][2]:
+								print ("- "+permission)
+						for permission in package_result[j][2]:
+							if not permission in package_result[i][2]:
+								print ("+ "+permission) 
 	cursor.close()
 	conn.close()
 	fout = open("Real_Version_Statistics.csv", "w")
