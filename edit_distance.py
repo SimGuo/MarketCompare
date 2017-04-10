@@ -84,11 +84,13 @@ if __name__ == '__main__':
 		package = package_list[i]
 		package_content = []
 		for market in market_list:
-			ifexists = cursor.execute("select Description, ReleaseNote from Market_APK_Metadata where Package_Name = '"+package+"' and MarketID = "+str(market))
+			ifexists = cursor.execute("select Market_APK_ID from Market_APP_Metadata where Package_Name = '"+package+"' and MarketID="+str(market))
 			if ifexists == 0:
 				package_content.append((None, None))
 				print("Not Found "+package+" In "+market_name[market])
 			else:
+				market_apk_id = cursor.fetchall()[0][0]
+				cursor.execute("select Description, ReleaseNote from Market_APK_Metadata where ID="+str(market_apk_id))
 				info = cursor.fetchall()[0]
 				package_content.append((info[0], info[1]))
 				print("Get "+package+" In "+market_name[market])
