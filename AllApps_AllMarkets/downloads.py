@@ -1,5 +1,4 @@
-from numpy import *
-import pymysql, math
+import math
 
 market_list = (0, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 15)#, 20, 21)
 big_market_index = (0, 1, 2, 3, 4, 5, 7)
@@ -29,7 +28,7 @@ googleplay_download_trans = {
 	10000000000: 7500000000,
 }
 
-fin = open('data.txt', 'r')
+fin = open('downloads.txt', 'r')
 
 for line in fin:
 	package = line.split('\t')[0]
@@ -38,13 +37,10 @@ for line in fin:
 	if dld == 'None': dld = None
 	else: dld = int(dld)
 	if dld != None and marketid in market_list:
-		if package in package_market_dl:
-			if marketid == 0: package_market_dl[package][marketid] = googleplay_download_trans[dld]
-			else: package_market_dl[package][marketid] = dld
-		else:
+		if not package in package_market_dl:
 			package_market_dl[package] = {}
-			if marketid == 0: package_market_dl[package][marketid] = googleplay_download_trans[dld]
-			else: package_market_dl[package][marketid] = dld
+		if marketid == 0: package_market_dl[package][marketid] = googleplay_download_trans[dld]
+		else: package_market_dl[package][marketid] = dld
 
 print (len(package_market_dl))
 
@@ -140,7 +136,7 @@ while True:
 				return avg, error_list
 		return sum(lst)/len(lst), error_list
 
-	factor = 1.93
+	factor = 1.9
 	has_error = 0
 
 	for package in package_market_dl.keys():
@@ -168,7 +164,7 @@ rank = []
 for key, val in result.items():
 	rank.append(tuple([key, val]))
 
-fout = open('Rank.csv', 'w')
+fout = open('Downloads_Rank.csv', 'w')
 
 rank.sort(key=lambda x:(-x[1], x[0]))
 for i in range(len(rank)):
