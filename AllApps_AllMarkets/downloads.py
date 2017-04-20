@@ -1,7 +1,7 @@
 import math
 
-market_list = (0, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 15)#, 20, 21)
-big_market_index = (0, 1, 2, 3, 4, 5, 7)
+market_list = (0, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 15, 21)
+big_market_index = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
 
 package_market_dl = {}
 
@@ -111,7 +111,7 @@ while True:
 	def average(lst, mkl):
 		error_list = []
 		if len(lst) <= 2:
-			return sum(lst)/len(lst), error_list
+			return sum(lst)/2, error_list
 	#	if len(lst) >= 4:
 	#		del(lst[lst.index(max(lst))])
 	#		del(lst[lst.index(min(lst))])
@@ -124,7 +124,7 @@ while True:
 			i = 0
 			prevlen = len(lst)
 			while i < len(lst):
-				while i < len(lst) and (lst[i] < avg-1.96*ste or lst[i] > avg+1.96*ste):
+				while i < len(lst) and (lst[i] > avg+1.96*ste): # or lst[i] < avg-1.96*ste
 					if lst[i] < avg:
 						error_list.append([mkl[i], '<'])
 					else:
@@ -136,7 +136,7 @@ while True:
 				return avg, error_list
 		return sum(lst)/len(lst), error_list
 
-	factor = 1.9
+	factor = 2.6
 	has_error = 0
 
 	for package in package_market_dl.keys():
@@ -168,7 +168,7 @@ fout = open('Downloads_Rank.csv', 'w')
 
 rank.sort(key=lambda x:(-x[1], x[0]))
 for i in range(len(rank)):
-	fout.write (rank[i][0]+','+str(rank[i][1])+'\n') #+','+str(len(package_market_dl[rank[i][0]]))+'\n')
+	fout.write (rank[i][0].replace(',', '.')+','+str(rank[i][1])+'\n') #+','+str(len(package_market_dl[rank[i][0]]))+'\n')
 #	for marketid in package_market_dl[rank[i][0]].keys():
 #		print (marketid, end=' ')
 #	print ()
