@@ -28,6 +28,12 @@ def dir_cmp(dir1, dir2):
 			elif os.path.isfile(dir2+i):
 				if open(dir1+i, 'rb').read() != open(dir2+i, 'rb').read():
 					print ('D '+str(dir1+i)[str(dir1+i).index('/')+1:])
+					if str(dir1+i).endswith('.RSA'):
+						rsa1 = os.popen('keytool -printcert -file '+dir1+i).read()
+						rsa2 = os.popen('keytool -printcert -file '+dir2+i).read()
+						if rsa1 != rsa2:
+							print (rsa1)
+							print (rsa2)
 			else:
 				print ('- '+str(dir1+i)[str(dir1+i).index('/')+1:])
 		elif os.path.isdir(dir1+i):
@@ -41,8 +47,19 @@ def dir_cmp(dir1, dir2):
 		if (not os.path.isdir(dir1+i)) and (not os.path.isfile(dir1+i)):
 			print ('+ '+str(dir2+i)[str(dir2+i).index('/')+1:])
 
+if True:
+	shutil.rmtree('~tmp1', ignore_errors=True)
+	shutil.rmtree('~tmp2', ignore_errors=True)
+	shutil.rmtree('~tmp3', ignore_errors=True)
+	decode_apk('/home/tzeho/MarketCompare/apk/yys/onmyoji_netease_9_1.0.17.apk', '~tmp1')
+	decode_apk('/home/tzeho/MarketCompare/apk/yys/com.tencent.tmgp.yys.zqb_1.0.17_17.apk', '~tmp2')
+	decode_apk('/home/tzeho/MarketCompare/apk/yys/com.netease.onmyoji.baidu_111810.apk', '~tmp3')
+	dir_cmp('~tmp1/', '~tmp2/')
+	dir_cmp('~tmp1/', '~tmp3/')
+	exit()
+
 if __name__ == '__main__':
-	conn = pymysql.connect(host='localhost', port=3306, user='root', password='pkuoslab', db='Android', charset='utf8')
+	conn = pymysql.connect(host='localhost', port=3306, user='root', password='pkuoslab', db='Android_10app', charset='utf8')
 	cursor = conn.cursor()
 	for package in package_list:
 		package_result = []

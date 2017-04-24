@@ -4,7 +4,7 @@ import pymysql, os, codecs, datetime
 stat_item = ('Download', 'Rating', 'Rating_Num', 'Metadata_Version', 'Update_Time', 'MD5_SHA256')
 
 if __name__ == '__main__':
-	conn = pymysql.connect(host='localhost', port=3306, user='root', password='pkuoslab', db='Android', charset='utf8')
+	conn = pymysql.connect(host='localhost', port=3306, user='root', password='pkuoslab', db='Android_10app', charset='utf8')
 	cursor = conn.cursor()
 	result = []
 	for package in package_list:

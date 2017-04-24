@@ -32,7 +32,7 @@ def edit_distance(str1, str2):
 	else: return 4
 	
 if __name__ == '__main__':
-	conn = pymysql.connect(host='localhost', port=3306, user='root', password='pkuoslab', db='Android', charset='utf8')
+	conn = pymysql.connect(host='localhost', port=3306, user='root', password='pkuoslab', db='Android_10app', charset='utf8')
 	cursor = conn.cursor()
 	content = []
 	for i in range(len(package_list)):
