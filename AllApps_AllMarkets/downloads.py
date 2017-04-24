@@ -1,7 +1,7 @@
 import math
 
-market_list = (0, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 15, 21)
-big_market_index = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13)
+market_list = (2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 15, 21)
+big_market_index = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
 
 package_market_dl = {}
 
@@ -136,7 +136,7 @@ while True:
 				return avg, error_list
 		return sum(lst)/len(lst), error_list
 
-	factor = 2.6
+	factor = 3.7
 	has_error = 0
 
 	for package in package_market_dl.keys():

@@ -1,4 +1,4 @@
-import codecs
+import codecs, random
 
 market_list = (0, 2, 4, 5, 6, 8, 9, 11, 15, 21)
 
@@ -17,35 +17,36 @@ for line in fin:
 
 fin.close()
 
-fin = open('rating.txt', 'r')
+files = ['rating_metadata.txt', 'rating.txt']
 
-for line in fin:
-	package = line.split('\t')[0]
-	market = int(line.split('\t')[1])
-	if market in market_list:
-		rating = line.split('\t')[2]
-		if rating == 'None': rating = None
-		else: rating = float(rating)
-		rating_num = line.split('\t')[3]
-		if rating_num == 'None': rating_num = None
-		else: rating_num = int(rating_num)
-		stars = line.split('\t')[4].replace('\r', "").replace('\n', "")
-		if stars == 'None': stars = None
-		else: 
-			star = stars.split(';')
-			star_sum = 0
-			real_rating = 0
-			for i in range(5):
-				star_sum += int(star[i])
-				real_rating += (i+1)*2*int(star[i])
-			if rating_num != None and rating_num > 0 and star_sum != 0:
-				rating = real_rating/star_sum
-		if rating != None and rating_num != None and package in package_market_rating:
-			if rating == 0 and rating_num == 0: package_market_rating[package][market] = [rating, rating_num, 'No Rating']
-			elif rating_num == 0: package_market_rating[package][market] = [rating, rating_num, 'Default Rating']
-			else: package_market_rating[package][market] = [rating, rating_num, 'Normal']
-
-fin.close()
+for file in files:
+	fin = open(file, 'r')
+	for line in fin:
+		package = line.split('\t')[0]
+		market = int(line.split('\t')[1])
+		if market in market_list:
+			rating = line.split('\t')[2]
+			if rating == 'None': rating = None
+			else: rating = float(rating)
+			rating_num = line.split('\t')[3]
+			if rating_num == 'None': rating_num = None
+			else: rating_num = int(rating_num)
+			stars = line.split('\t')[4].replace('\r', "").replace('\n', "")
+			if stars == 'None': stars = None
+			else: 
+				star = stars.split(';')
+				star_sum = 0
+				real_rating = 0
+				for i in range(5):
+					star_sum += int(star[i])
+					real_rating += (i+1)*2*int(star[i])
+				if rating_num != None and rating_num > 0 and star_sum != 0:
+					rating = real_rating/star_sum
+			if rating != None and rating_num != None and package in package_market_rating:
+				if rating == 0 and rating_num == 0: package_market_rating[package][market] = [rating, rating_num, 'No Rating']
+				elif rating_num == 0: package_market_rating[package][market] = [rating, rating_num, 'Default Rating']
+				else: package_market_rating[package][market] = [rating, rating_num, 'Normal']
+	fin.close()
 
 threshold_rate_too_much = 30
 threshold_num_too_much = 100
@@ -77,40 +78,6 @@ for market in market_list:
 			if package_market_rating[package][market][1] <= threshold_num_too_less or package_market_rating[package][market][1]/package_market_rating[package]['Downloads'] < threshold_rate_too_less*rating_num_downloads_rate:
 				package_market_rating[package][market][2] = 'Too Less Rating Num'
 
-"""
-for market in market_list:
-	for package in package_market_rating.keys():
-		if package_market_rating[package][market] != None:
-			print_dl = False
-			if package_market_rating[package][market][2] == 'Too Much Rating Num':
-				if not print_dl:
-					print (package, end = ' (')
-					print (package_market_rating[package]['Downloads'], end = ') : ')
-					print_dl = True
-				print ([market, package_market_rating[package][market][0], package_market_rating[package][market][1]], end = ' ')
-			if print_dl:
-				print ()
-"""
-
-for market in market_list:			
-	cnt = 0
-	cnt_normal = 0
-	cnt_no_rating = 0
-	cnt_default_rating = 0
-	cnt_too_much_rating_num = 0
-	cnt_too_less_rating_num = 0
-	cnt_unknown = 0
-	for package in package_market_rating.keys():
-		if package_market_rating[package]['Downloads'] >= threshold_min_downloads and package_market_rating[package][market] != None:
-			cnt += 1
-			if package_market_rating[package][market][2] == 'Normal': cnt_normal += 1
-			elif package_market_rating[package][market][2] == 'No Rating': cnt_no_rating += 1
-			elif package_market_rating[package][market][2] == 'Default Rating': cnt_default_rating += 1
-			elif package_market_rating[package][market][2] == 'Too Much Rating Num': cnt_too_much_rating_num += 1
-			elif package_market_rating[package][market][2] == 'Too Less Rating Num': cnt_too_less_rating_num += 1
-			else: cnt_unknown += 1
-	print ([market, cnt, cnt_normal, cnt_no_rating, cnt_default_rating, cnt_too_much_rating_num, cnt_too_less_rating_num, cnt_unknown])
-
 def get_median(lst):
 	if not len(lst):
 		return None
@@ -118,7 +85,7 @@ def get_median(lst):
 	half = len(lst) // 2
 	return (lst[half]+lst[~half])/2
 
-threshold_min_markets = 2 # 6/7
+threshold_min_markets = 5
 threshold_abnormal = 2
 
 for package in package_market_rating:
@@ -190,9 +157,9 @@ for package in package_market_rating:
 			if no_rating: package_cnt_no_rating += 1
 			if default_rating: package_cnt_default_rating += 1
 			if too_much_rating_num: package_cnt_too_much_rating_num += 1
-			if too_less_rating_num: package_cnt_too_less_rating_num += 1
+			if no_rating or default_rating or too_less_rating_num: package_cnt_too_less_rating_num += 1
 
-print ([package_cnt, package_cnt_normal, package_cnt_no_normal, package_cnt_abnormal, package_cnt_too_much_rating_num, package_cnt_no_rating, package_cnt_default_rating, package_cnt_too_less_rating_num])
+print ([package_cnt, package_cnt_normal, package_cnt_no_normal, package_cnt_abnormal, package_cnt_too_much_rating_num, package_cnt_no_rating+package_cnt_default_rating+package_cnt_too_less_rating_num])
 
 for market in market_list:			
 	cnt = 0
@@ -213,31 +180,8 @@ for market in market_list:
 			elif package_market_rating[package][market][2] == 'Too Much Rating Num': cnt_too_much_rating_num += 1
 			elif package_market_rating[package][market][2] == 'Too Less Rating Num': cnt_too_less_rating_num += 1
 			else: cnt_unknown += 1
-	print ([market, cnt, cnt_normal, cnt_abnormal, cnt_no_rating, cnt_default_rating, cnt_too_much_rating_num, cnt_too_less_rating_num, cnt_unknown])
-
+	print ([market, cnt, cnt_normal, cnt_abnormal, cnt_too_much_rating_num, cnt_no_rating+cnt_default_rating+cnt_too_less_rating_num]) #, cnt_unknown])
 """
-market_print = (0, 2, 6, 8, 15, 21)
-
-for market in market_print:
-	package_print = set()
-	for package in package_market_rating.keys():
-		if package in select_package_set and package_market_rating[package][market] == None:
-			package_print.add(package)
-	market_name = {
-		0: 'googleplay',
-		2: 'yingyongbao',
-		6: 'xiaomi',
-		8: 'hiapk',
-		15: 'meizu',
-		21: 'lenovo'
-	}
-	fout = codecs.open(market_name[market]+'_url_pair.txt', 'w', 'utf-8')
-	for package in package_print:
-		if market != 21: fout.write(package+' '+package+'\n')
-		else: fout.write(package+'/0 '+package+'\n')
-	fout.close()
-"""
-
 for package in select_package_set:
 	too_much_rating_num = False
 	for market in market_list:
@@ -251,9 +195,23 @@ for package in select_package_set:
 				print ([market, package_market_rating[package][market][0], package_market_rating[package][market][1]], end='; ')
 	if too_much_rating_num:
 		print ()
-
-for market in market_list:
-	print (market)
-	for package in select_package_set:
-		if package_market_rating[package][market] != None and package_market_rating[package][market][2] == 'Too Much Rating Num' and package_market_rating[package][market][0] < 9:
-			print ([package, package_market_rating[package][market][0], package_market_rating[package][market][1]])
+"""
+lower_bound = [10, 9, 7, 4, 0]
+upper_bound = [10.1, 10, 9, 7, 4]
+for i in range(5):
+	print ("["+str(lower_bound[i])+", "+str(upper_bound[i])+")")
+	for market in market_list:
+		print (market)
+		package_random = []
+		for package in select_package_set:
+			if package_market_rating[package][market] != None and package_market_rating[package][market][2] == 'Too Much Rating Num' and package_market_rating[package][market][0] >= lower_bound[i] and package_market_rating[package][market][0] < upper_bound[i]:
+				package_random.append(package)
+		if len(package_random):
+			if len(package_random) <= 10:
+				for package in package_random:
+					print ([package, package_market_rating[package][market][0], package_market_rating[package][market][1]])
+			else:
+				random.shuffle(package_random)
+				for j in range(10):
+					package = package_random[j]
+					print ([package, package_market_rating[package][market][0], package_market_rating[package][market][1]])
