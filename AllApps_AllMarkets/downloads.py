@@ -1,6 +1,6 @@
-import math
+import math, codecs
 
-market_list = (2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 15, 21)
+market_list = (0, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 15, 21)
 big_market_index = (0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12)
 
 package_market_dl = {}
@@ -28,7 +28,7 @@ googleplay_download_trans = {
 	10000000000: 7500000000,
 }
 
-fin = open('downloads.txt', 'r')
+fin = codecs.open('data.txt', 'r', 'utf-8')
 
 for line in fin:
 	package = line.split('\t')[0]
