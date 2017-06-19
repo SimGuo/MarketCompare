@@ -2,6 +2,35 @@ import codecs, math
 
 market_list = (0, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26)
 
+market_name = {
+	0: 'Google Play',
+	2: '应用宝',
+	3: '百度手机助手',
+	4: '360手机助手',
+	5: '华为应用市场',
+	6: '小米应用商店',
+	7: '豌豆荚',
+	8: '安卓市场',
+	9: '安智市场',
+	10: '91应用中心',
+	11: 'OPPO软件商店',
+	12: 'PP助手',
+	13: '搜狗手机助手',
+	14: '机锋网',
+	15: '魅族应用商店',
+	16: '新浪应用中心',
+	17: '当乐网',
+	18: '历趣市场',
+	19: '应用汇',
+	20: '移动应用商场',
+	21: '乐商店',
+	22: 'ZOL手机软件',
+	23: 'N多市场',
+	24: '手机中国',
+	25: '太平洋下载中心',
+	26: '应用酷'
+}
+
 package_market_rating = {}
 
 with codecs.open('data.txt', 'r', 'utf-8') as fin:
@@ -42,7 +71,7 @@ print (common_pkg_num_lst)
 def analyzelst(lst):
 	if lst == None or not len(lst):
 		print ("Empty List")
-		return
+		return None
 	print ("Length:", len(lst))
 	lst.sort()
 	half = len(lst)//2
@@ -56,8 +85,17 @@ def analyzelst(lst):
 		ste += (i-avg)*(i-avg)
 	ste = math.sqrt(ste/len(lst))
 	print ("Average:", avg, "SE:", ste)
+	return lst[0], quarter1, median, quarter3, lst[-1], avg, ste
 
 mkt_stat = {}
+
+fout_rating_include_default = codecs.open('stat/rating_include_default.csv', 'w', 'utf-8')
+fout_rating_exclude_default = codecs.open('stat/rating_exclude_default.csv', 'w', 'utf-8')
+fout_rating_num = codecs.open('stat/rating_num.csv', 'w', 'utf-8')
+
+fout_rating_include_default.write('市场名称,样本数量,最小值,下四分位数,中位数,上四分位数,最大值,平均数,标准差\n')
+fout_rating_exclude_default.write('市场名称,样本数量,最小值,下四分位数,中位数,上四分位数,最大值,平均数,标准差\n')
+fout_rating_num.write('市场名称,样本数量,最小值,下四分位数,中位数,上四分位数,最大值,平均数,标准差\n')
 
 for mkt in market_list:
 	mkt_stat[mkt] = {'Package Num': 0, 'No Rating Package Num': 0, 'Default Rating Package Num': 0, 'Normal Rating Package Num': 0, 'Rating Include Default': [], 'Rating Exclude Default': [], 'Rating Num': []}
@@ -78,14 +116,29 @@ for mkt in market_list:
 	print (mkt)
 	print (mkt_stat[mkt]['Package Num'], mkt_stat[mkt]['No Rating Package Num'], mkt_stat[mkt]['Default Rating Package Num'], mkt_stat[mkt]['Normal Rating Package Num'])
 	print ('Rating Include Default')
-	analyzelst(mkt_stat[mkt]['Rating Include Default'])
+	r = analyzelst(mkt_stat[mkt]['Rating Include Default'])
+	if r != None: fout_rating_include_default.write(market_name[mkt]+','+str(mkt_stat[mkt]['Default Rating Package Num']+mkt_stat[mkt]['Normal Rating Package Num'])+','+str(r[0])+','+str(r[1])+','+str(r[2])+','+str(r[3])+','+str(r[4])+','+str(r[5])+','+str(r[6])+'\n')
 	print ('Rating Exclude Default')
-	analyzelst(mkt_stat[mkt]['Rating Exclude Default'])
+	r = analyzelst(mkt_stat[mkt]['Rating Exclude Default'])
+	if r != None: fout_rating_exclude_default.write(market_name[mkt]+','+str(mkt_stat[mkt]['Normal Rating Package Num'])+','+str(r[0])+','+str(r[1])+','+str(r[2])+','+str(r[3])+','+str(r[4])+','+str(r[5])+','+str(r[6])+'\n')
 	print ('Rating Num')
-	analyzelst(mkt_stat[mkt]['Rating Num'])
+	r = analyzelst(mkt_stat[mkt]['Rating Num'])
+	if r != None: fout_rating_num.write(market_name[mkt]+','+str(len(mkt_stat[mkt]['Rating Num']))+','+str(r[0])+','+str(r[1])+','+str(r[2])+','+str(r[3])+','+str(r[4])+','+str(r[5])+','+str(r[6])+'\n')
 	print ('')
 
+fout_rating_num.close()
+fout_rating_exclude_default.close()
+fout_rating_include_default.close()
+
 mkt_stat = {}
+
+fout_rating_include_default = codecs.open('stat/common_apps_rating_include_default.csv', 'w', 'utf-8')
+fout_rating_exclude_default = codecs.open('stat/common_apps_rating_exclude_default.csv', 'w', 'utf-8')
+fout_rating_num = codecs.open('stat/common_apps_rating_num.csv', 'w', 'utf-8')
+
+fout_rating_include_default.write('市场名称,样本数量,最小值,下四分位数,中位数,上四分位数,最大值,平均数,标准差\n')
+fout_rating_exclude_default.write('市场名称,样本数量,最小值,下四分位数,中位数,上四分位数,最大值,平均数,标准差\n')
+fout_rating_num.write('市场名称,样本数量,最小值,下四分位数,中位数,上四分位数,最大值,平均数,标准差\n')
 
 for mkt in market_list:
 	mkt_stat[mkt] = {'Package Num': 0, 'No Rating Package Num': 0, 'Default Rating Package Num': 0, 'Normal Rating Package Num': 0, 'Rating Include Default': [], 'Rating Exclude Default': [], 'Rating Num': []}
@@ -106,9 +159,16 @@ for mkt in market_list:
 	print (mkt)
 	print (mkt_stat[mkt]['Package Num'], mkt_stat[mkt]['No Rating Package Num'], mkt_stat[mkt]['Default Rating Package Num'], mkt_stat[mkt]['Normal Rating Package Num'])
 	print ('Rating Include Default')
-	analyzelst(mkt_stat[mkt]['Rating Include Default'])
+	r = analyzelst(mkt_stat[mkt]['Rating Include Default'])
+	if r != None: fout_rating_include_default.write(market_name[mkt]+','+str(mkt_stat[mkt]['Default Rating Package Num']+mkt_stat[mkt]['Normal Rating Package Num'])+','+str(r[0])+','+str(r[1])+','+str(r[2])+','+str(r[3])+','+str(r[4])+','+str(r[5])+','+str(r[6])+'\n')
 	print ('Rating Exclude Default')
-	analyzelst(mkt_stat[mkt]['Rating Exclude Default'])
+	r = analyzelst(mkt_stat[mkt]['Rating Exclude Default'])
+	if r != None: fout_rating_exclude_default.write(market_name[mkt]+','+str(mkt_stat[mkt]['Normal Rating Package Num'])+','+str(r[0])+','+str(r[1])+','+str(r[2])+','+str(r[3])+','+str(r[4])+','+str(r[5])+','+str(r[6])+'\n')
 	print ('Rating Num')
-	analyzelst(mkt_stat[mkt]['Rating Num'])
+	r = analyzelst(mkt_stat[mkt]['Rating Num'])
+	if r != None: fout_rating_num.write(market_name[mkt]+','+str(len(mkt_stat[mkt]['Rating Num']))+','+str(r[0])+','+str(r[1])+','+str(r[2])+','+str(r[3])+','+str(r[4])+','+str(r[5])+','+str(r[6])+'\n')
 	print ('')
+
+fout_rating_num.close()
+fout_rating_exclude_default.close()
+fout_rating_include_default.close()
